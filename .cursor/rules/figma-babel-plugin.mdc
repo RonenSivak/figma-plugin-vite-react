@@ -1,0 +1,230 @@
+---
+description: 
+globs: src/**/*
+alwaysApply: false
+---
+---
+description: Development guidelines for the Figma x Babel Plugin project covering architecture, integration patterns, and implementation standards.
+globs: src/**/*
+alwaysApply: true
+---
+
+# Figma x Babel Plugin Development Guidelines
+
+## Architecture Principles
+
+### Plugin Structure
+- **Main Plugin Logic**: Implement core Figma API interactions in TypeScript
+- **UI Layer**: Build reactive interfaces using React + Vite
+- **Build Output**: Generate `dist/code.js` (main) and `dist/ui.html` (UI)
+- **State Management**: Use React Context API for plugin state management
+
+### Technology Stack
+```typescript
+// Required tech stack
+- Build Tool: Vite + React
+- Language: TypeScript
+- Testing: React Testing Library + Vitest
+- Deployment: Falcon + FIGCD integration
+- Design System: Wix Design System + Figma tokens
+```
+
+## Figma Plugin Patterns
+
+### Text Node Management
+```typescript
+// Good: Systematic text extraction
+async function extractTextNodes(): Promise<TextNode[]> {
+  const nodes = figma.currentPage.findAll(node => 
+    node.type === 'TEXT' && node.visible
+  );
+  return nodes.filter(isValidTextNode);
+}
+
+// Bad: Manual text handling without validation
+const allNodes = figma.currentPage.findAll();
+```
+
+### Key Generation Strategy
+- Use descriptive, hierarchical naming: `component.section.element`
+- Auto-generate keys based on content hierarchy and context
+- Attach keys as Figma annotations for persistence
+- Support both manual and AI-assisted key creation
+
+### Visual Context Export
+```typescript
+// Export screenshots with context
+async function exportWithContext(nodes: SceneNode[]) {
+  const screenshots = await Promise.all(
+    nodes.map(node => node.exportAsync({
+      format: 'PNG',
+      constraint: { type: 'SCALE', value: 2 }
+    }))
+  );
+  return screenshots;
+}
+```
+
+## Integration Patterns
+
+### Babel API Integration
+- **Authentication**: Use Wix User Token for Babel API access
+- **Sync Strategy**: Implement bi-directional content synchronization
+- **Conflict Resolution**: Detect and resolve content differences
+- **Content Upload**: Include visual context (screenshots) with text
+
+```typescript
+// Integration interface
+interface BabelIntegration {
+  syncContent(projectId: string, content: ContentMap): Promise<SyncResult>;
+  detectConflicts(local: ContentMap, remote: ContentMap): ConflictReport;
+  uploadVisualContext(contentId: string, screenshot: Uint8Array): Promise<void>;
+}
+```
+
+### AI Layer Integration
+```typescript
+// AI service integration
+interface AIService {
+  generateSuggestions(frameId: string): Promise<ContentSuggestion[]>;
+  evaluateContent(content: string): Promise<QualityMetrics>;
+  generateKeys(content: string, context: DesignContext): Promise<string>;
+}
+```
+
+## Development Phases
+
+### Phase 1: MVP Implementation
+- Focus on core text extraction and management
+- Implement basic key generation and export
+- Real-time bi-directional sync
+- PNG screenshot capabilities
+
+### Phase 2: Babel Integration
+- Full Babel API connectivity
+- Conflict detection and resolution
+- Visual context upload
+- Comprehensive testing
+
+### Phase 3: AI Enhancement
+- Jot AI integration for content suggestions
+- ICU syntax and parameter support
+- Auto-tagging and priority labeling
+- AI Prompt Hub integration
+
+## Code Organization
+
+### File Structure
+```
+src/
+├── main/           # Figma plugin logic
+│   ├── api/        # Figma API interactions
+│   ├── babel/      # Babel integration
+│   └── ai/         # AI service integration
+├── ui/             # React UI components
+│   ├── components/ # Reusable UI components
+│   ├── views/      # Plugin screens/panels
+│   └── hooks/      # Custom React hooks
+├── shared/         # Shared types and utilities
+└── tests/          # Test files
+```
+
+### Component Patterns
+```typescript
+// Good: Focused component with clear responsibility
+interface TextNodeListProps {
+  nodes: TextNode[];
+  onKeyAssign: (nodeId: string, key: string) => void;
+  onExport: (selectedNodes: TextNode[]) => void;
+}
+
+const TextNodeList: React.FC<TextNodeListProps> = ({ 
+  nodes, 
+  onKeyAssign, 
+  onExport 
+}) => {
+  // Component implementation
+};
+```
+
+## User Experience Guidelines
+
+### Target Personas Support
+- **UX Writers**: Streamlined content creation and consistency tools
+- **Localization Managers**: Visual context and pipeline management
+- **Developers**: Clear key naming and implementation guidance
+- **Product Managers**: Content readiness visibility
+
+### Interaction Patterns
+- **Modal Interfaces**: Use for content review and editing
+- **Real-time Sync**: Provide immediate feedback on changes
+- **Visual Context**: Always include design context with content
+- **Error Handling**: Clear, actionable error messages
+
+## Testing Requirements
+
+### Unit Testing
+```typescript
+// Test plugin logic thoroughly
+describe('TextExtraction', () => {
+  it('should extract visible text nodes only', () => {
+    // Test implementation
+  });
+  
+  it('should generate hierarchical keys', () => {
+    // Test key generation logic
+  });
+});
+```
+
+### Integration Testing
+- Test Babel API connectivity
+- Verify visual context upload
+- Validate sync mechanisms
+- Test conflict resolution
+
+### E2E Testing
+- Full plugin workflow testing
+- Cross-platform compatibility
+- Performance under load
+
+## Security & Performance
+
+### Authentication
+- Secure Wix User Token handling
+- API rate limiting compliance
+- Secure data transmission
+
+### Performance
+- Efficient Figma API usage
+- Optimized screenshot generation
+- Background processing for AI operations
+- Memory management for large designs
+
+## Quality Assurance
+
+### Code Quality
+- ESLint + Prettier configuration
+- TypeScript strict mode
+- Consistent error handling
+- Comprehensive logging
+
+### Monitoring
+- Sentry integration for error tracking
+- Performance metrics collection
+- User interaction analytics
+- API usage monitoring
+
+## Documentation
+
+### Code Documentation
+- Clear interface definitions
+- API integration examples
+- Error code references
+- Performance considerations
+
+### User Documentation
+- Plugin usage guides
+- Workflow examples
+- Troubleshooting guides
+- Best practices
