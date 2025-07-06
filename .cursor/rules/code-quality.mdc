@@ -15,6 +15,9 @@ Always verify information before presenting it. Do not make assumptions or specu
 ## File-by-File Changes
 Make changes file by file and give me a chance to spot mistakes.
 
+## const over function
+use Constant Variable Declaration over Function Declaration
+
 ## No Apologies
 Never use apologies.
 

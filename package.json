@@ -17,6 +17,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@wix/design-system": "^1.204.0",
     "monorepo-networker": "^2.1.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
@@ -43,7 +44,6 @@
     "typescript-eslint": "^8.34.1",
     "vite": "^7.0.0",
     "vite-plugin-generate-file": "^0.1.1",
-    "vite-plugin-react-rich-svg": "^1.0.0",
     "vite-plugin-singlefile": "^2.0.3"
   }
 }
