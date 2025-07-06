@@ -4,7 +4,6 @@ import { UI_CHANNEL } from "./App.network.ts";
 import { Networker } from "monorepo-networker";
 import { createRoot } from "react-dom/client";
 import App from './App.tsx'
-import { WixDesignSystemProvider } from '@wix/design-system';
 import "@wix/design-system/styles.global.css";
 
 async function bootstrap() {
@@ -17,9 +16,7 @@ async function bootstrap() {
 
   root.render(
     <StrictMode>
-      <WixDesignSystemProvider features={{ newColorsBranding: true }}>
         <App />
-      </WixDesignSystemProvider>
     </StrictMode>
   );
 }

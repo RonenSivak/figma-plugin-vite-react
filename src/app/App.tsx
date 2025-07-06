@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Box, Card, Button, Text, Input, Loader } from '@wix/design-system'
+import { Box, Card, Button, Text, Input, Loader, WixDesignSystemProvider } from '@wix/design-system'
 import { UI_CHANNEL, setBootstrapCallback } from './App.network'
 import { PLUGIN } from '../common/networks'
 
@@ -111,6 +111,7 @@ function App() {
   }
 
   return (
+    <WixDesignSystemProvider features={{ newColorsBranding: true }}>
     <Box 
       padding="SP6" 
       direction="vertical" 
@@ -228,6 +229,7 @@ function App() {
         </Card.Content>
       </Card>
     </Box>
+    </WixDesignSystemProvider>
   )
 }
 

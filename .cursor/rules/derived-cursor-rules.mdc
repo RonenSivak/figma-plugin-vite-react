@@ -16,3 +16,5 @@ globs: *
 When modifying the `package.json` file, use `npm-run-all` if it is already a `devDependency` to run multiple scripts. This is preferred for build commands.
 
 ## DEBUGGING
+
+Fastest way to look where test gets stuck when it is not obvious from output is to disable headless mode and enabled slowMo in `playwright.config.ts` file and rerun specific test.

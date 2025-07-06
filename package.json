@@ -18,7 +18,11 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug",
+    "e2e:codegen": "playwright codegen http://localhost:5175"
   },
   "dependencies": {
     "@wix/design-system": "^1.204.0",
@@ -29,6 +33,7 @@
   "devDependencies": {
     "@eslint/js": "^9.29.0",
     "@figma/plugin-typings": "^1.83.0",
+    "@playwright/test": "^1.53.2",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",

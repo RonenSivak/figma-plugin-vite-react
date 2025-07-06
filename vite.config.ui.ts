@@ -19,4 +19,7 @@ export default defineConfig(({ mode }) => ({
       "@app": path.resolve("src/app"),
     },
   },
+  define: {
+    global: 'globalThis',
+  },
 }));

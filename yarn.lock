@@ -959,6 +959,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@playwright/test@npm:^1.53.2":
+  version: 1.53.2
+  resolution: "@playwright/test@npm:1.53.2"
+  dependencies:
+    playwright: "npm:1.53.2"
+  bin:
+    playwright: cli.js
+  checksum: 10c0/cdc718a94df00aaaff5489421a89286e006e9c7781c5e8294fd10aaffcf6558cfe3d0db2d76a447574b334329902659cd539756dfd12fafde03627e2013698ae
+  languageName: node
+  linkType: hard
+
 "@polka/url@npm:^1.0.0-next.24":
   version: 1.0.0-next.29
   resolution: "@polka/url@npm:1.0.0-next.29"
@@ -3673,6 +3684,7 @@ __metadata:
   dependencies:
     "@eslint/js": "npm:^9.29.0"
     "@figma/plugin-typings": "npm:^1.83.0"
+    "@playwright/test": "npm:^1.53.2"
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/jest-dom": "npm:^6.6.3"
     "@testing-library/react": "npm:^16.3.0"
@@ -5579,7 +5591,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright@npm:^1.52.0":
+"playwright@npm:1.53.2, playwright@npm:^1.52.0":
   version: 1.53.2
   resolution: "playwright@npm:1.53.2"
   dependencies:

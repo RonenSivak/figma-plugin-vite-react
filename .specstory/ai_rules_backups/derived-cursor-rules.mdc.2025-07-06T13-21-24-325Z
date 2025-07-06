@@ -1,0 +1,14 @@
+
+## HEADERS
+
+## TECH STACK
+
+## PROJECT DOCUMENTATION & CONTEXT SYSTEM
+
+## CODING STANDARDS
+
+## WORKFLOW & RELEASE RULES
+
+When modifying the `package.json` file, use `npm-run-all` if it is already a `devDependency` to run multiple scripts. This is preferred for build commands.
+
+## DEBUGGING
