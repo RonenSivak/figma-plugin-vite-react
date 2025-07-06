@@ -172,8 +172,9 @@ function App() {
             {clickInfo && (
               <Box 
                 padding="SP3" 
-                backgroundColor="B10" 
+                backgroundColor="B40" 
                 borderRadius="4px"
+                direction="vertical"
               >
                 <Text size="small" weight="bold">Auto-detected click:</Text>
                 <Text size="small">{clickInfo}</Text>

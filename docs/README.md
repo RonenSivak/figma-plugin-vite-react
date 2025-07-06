@@ -1,4 +1,4 @@
-# Figma Plugin MVP
+# Figma Plugin Vite React
 
 ## What is this?
 
