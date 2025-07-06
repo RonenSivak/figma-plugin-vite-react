@@ -8,22 +8,42 @@ function App() {
   const [textToCreate, setTextToCreate] = useState('')
   const [response, setResponse] = useState('')
   const [clickInfo, setClickInfo] = useState('')
+  const [clickedText, setClickedText] = useState('')
+  const [generatedKey, setGeneratedKey] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [pongCount, setPongCount] = useState(0)
-  const [isBootstrapped, setIsBootstrapped] = useState(false)
+  const [pluginReady, setPluginReady] = useState(false)
 
   // Wait for plugin bootstrap before showing UI
   useEffect(() => {    
     // Set bootstrap completion callback
     setBootstrapCallback((flag: boolean) => {
-      setIsBootstrapped(flag);
+      setPluginReady(flag);
     });
 
     // Listen for text click notifications from plugin
     UI_CHANNEL.registerMessageHandler("textClicked", (nodeId, text) => {
       setClickInfo(`user clicked on ${nodeId} with text "${text}"`)
+      setClickedText(text)
+      setGeneratedKey('') // Clear previous key
     });
   }, [])
+
+  // Convert text to kebab-case and create babel key
+  const generateKey = () => {
+    if (!clickedText.trim()) return
+    
+    const kebabCase = clickedText
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+      .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
+    
+    const key = `babel.key.${kebabCase}`
+    setGeneratedKey(key)
+  }
 
   const handlePing = async () => {
     try {
@@ -70,8 +90,8 @@ function App() {
     }
   }
 
-  // Show loading state until plugin is bootstrapped
-  if (!isBootstrapped) {
+  // Show loading state until plugin is ready
+  if (!pluginReady) {
     return (
       <Box 
         padding="SP6" 
@@ -168,16 +188,39 @@ function App() {
               </Box>
             )}
 
-            {/* Click Info Display */}
+            {/* Click Info Display with Generate Key */}
             {clickInfo && (
               <Box 
                 padding="SP3" 
                 backgroundColor="B40" 
                 borderRadius="4px"
                 direction="vertical"
+                gap="SP2"
               >
                 <Text size="small" weight="bold">Auto-detected click:</Text>
                 <Text size="small">{clickInfo}</Text>
+                
+                <Button 
+                  onClick={generateKey}
+                  disabled={!clickedText.trim()}
+                  size="small"
+                  skin="light"
+                  fullWidth
+                >
+                  🔑 Generate Key
+                </Button>
+                
+                {generatedKey && (
+                  <Box 
+                    padding="SP2" 
+                    backgroundColor="G50" 
+                    borderRadius="4px"
+                    gap="SP1"
+                  >
+                    <Text size="small" weight="bold">Generated Key:</Text>
+                    <Text size="small" skin="standard">{generatedKey}</Text>
+                  </Box>
+                )}
               </Box>
             )}
             
