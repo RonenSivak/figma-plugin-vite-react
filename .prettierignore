@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+.yarn/
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Generated files
+yarn.lock
+package-lock.json
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Figma
+*.figma
+
+# Test results
+test-results/
+playwright-report/
+
+# SpecStory
+.specstory/
+
+# Git
+.git/
+
+# Other
+*.min.js
+*.min.css 

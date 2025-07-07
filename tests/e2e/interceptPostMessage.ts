@@ -12,14 +12,16 @@ export interface InterceptPostMessageOptions {
  * Creates a postMessage interceptor script that can be injected into the page
  * to mock Figma plugin communication with configurable responses
  */
-export const createPostMessageInterceptor = (options: InterceptPostMessageOptions): string => {
+export const createPostMessageInterceptor = (
+  options: InterceptPostMessageOptions
+): string => {
   const { mockResponses, delay = 100, enableLogging = true } = options
-  
+
   // Convert function definitions to strings that can be injected
   const mockResponseFunctions = Object.entries(mockResponses)
     .map(([eventName, func]) => `'${eventName}': ${func.toString()}`)
     .join(',\n    ')
-  
+
   return `
     // Store original console.log for debugging
     const originalLog = console.log;
@@ -106,23 +108,23 @@ export const createPostMessageInterceptor = (options: InterceptPostMessageOption
     if (${enableLogging}) {
       originalLog('postMessage interceptor installed with mock response handlers for:', Object.keys({${mockResponseFunctions}}));
     }
-  `;
+  `
 }
 
 // Default mock responses for common plugin operations
 export const defaultMockResponses: MockResponseConfig = {
-  ping: (payload) => {
-    const count = payload[0] || 1
+  ping: payload => {
+    const count = payload?.[0] || 1
     return `Pong received! Count: ${count}`
   },
-  
-  message: (payload) => {
-    const message = payload[0] || ''
+
+  message: payload => {
+    const message = payload?.[0] || ''
     return `Message received: "${message}"`
   },
-  
-  createText: (payload) => {
-    const text = payload[0] || ''
+
+  createText: payload => {
+    const text = payload?.[0] || ''
     return `Text node created: "${text}"`
-  }
-} 
+  },
+}

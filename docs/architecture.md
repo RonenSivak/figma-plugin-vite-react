@@ -12,22 +12,22 @@ graph TB
             PN[Network Handler<br/>network.ts]
             P --> PN
         end
-        
+
         subgraph "UI Process"
             U[React App<br/>App.tsx]
             UN[Network Handler<br/>network.ts]
             U --> UN
         end
     end
-    
+
     subgraph "Shared"
         NT[Message Types<br/>types.ts]
     end
-    
+
     PN <--> UN
     PN -.-> NT
     UN -.-> NT
-    
+
     P --> FA[Figma API]
     U --> UI_LIB[UI Library]
 ```
@@ -42,13 +42,13 @@ The plugin uses a 3-step handshake to ensure both sides are ready before showing
 sequenceDiagram
     participant P as Plugin
     participant UI as UI
-    
+
     Note over P,UI: Step 1: Plugin Ready
     P->>UI: initialize("System ready")
-    
+
     Note over P,UI: Step 2: UI Acknowledges
     UI->>P: acknowledge()
-    
+
     Note over P,UI: Step 3: Communication Established
     P->>UI: activate()
     UI->>UI: Show main interface
@@ -63,7 +63,7 @@ sequenceDiagram
     participant UI as UI
     participant P as Plugin
     participant F as Figma API
-    
+
     Note over UI,F: User performs action
     UI->>P: performAction(data)
     P->>F: figma.apiCall()
@@ -81,7 +81,7 @@ sequenceDiagram
     participant F as Figma API
     participant P as Plugin
     participant UI as UI
-    
+
     Note over F,UI: User interacts with canvas
     F->>P: canvasEvent(eventData)
     P->>P: Process event
@@ -92,6 +92,7 @@ sequenceDiagram
 ## Key Components
 
 ### Plugin Process (`src/plugin/`)
+
 - **Environment**: Figma's sandboxed JavaScript
 - **Role**: Handles Figma API operations and events
 - **Files**:
@@ -99,6 +100,7 @@ sequenceDiagram
   - `network.ts` - Message handlers and API operations
 
 ### UI Process (`src/app/`)
+
 - **Environment**: React app in iframe
 - **Role**: Provides user interface and manages state
 - **Files**:
@@ -106,6 +108,7 @@ sequenceDiagram
   - `network.ts` - Network setup and message handling
 
 ### Network Layer (`src/common/`)
+
 - **Purpose**: Type-safe communication between processes
 - **Files**:
   - `types.ts` - Message type definitions and contracts
@@ -115,18 +118,18 @@ sequenceDiagram
 ```typescript
 // Plugin can receive these messages
 PluginMessages<{
-  executeCommand(params: CommandParams): Promise<Result>;
-  updateSettings(config: Settings): void;
-  requestData(query: DataQuery): Promise<Data>;
-}>();
+  executeCommand(params: CommandParams): Promise<Result>
+  updateSettings(config: Settings): void
+  requestData(query: DataQuery): Promise<Data>
+}>()
 
 // UI can receive these messages
 UIMessages<{
-  initialize(status: string): void;
-  activate(): void;
-  dataChanged(newData: Data): void;
-  eventNotification(event: Event): void;
-}>();
+  initialize(status: string): void
+  activate(): void
+  dataChanged(newData: Data): void
+  eventNotification(event: Event): void
+}>()
 ```
 
 ## Data Flow
@@ -138,13 +141,13 @@ flowchart LR
         C[Input Change] --> D[Update Data]
         E[Canvas Selection] --> F[Show Details]
     end
-    
+
     subgraph "Processing"
         B --> G[Network Request]
         D --> H[API Operation]
         F --> I[Event Handler]
     end
-    
+
     subgraph "Results"
         G --> J[Update UI]
         H --> K[Modify Canvas]

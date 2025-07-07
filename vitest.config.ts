@@ -9,10 +9,11 @@ export default defineConfig({
     setupFiles: './src/test/setup.ts',
     css: true,
     reporters: ['verbose'],
+    exclude: ['tests/e2e/**', 'node_modules/**'],
   },
   resolve: {
     alias: {
       '@': '/src',
     },
   },
-}) 
+})

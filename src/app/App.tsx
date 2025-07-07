@@ -1,5 +1,13 @@
 import { useState, useEffect } from 'react'
-import { Box, Card, Button, Text, Input, Loader, WixDesignSystemProvider } from '@wix/design-system'
+import {
+  Box,
+  Card,
+  Button,
+  Text,
+  Input,
+  Loader,
+  WixDesignSystemProvider,
+} from '@wix/design-system'
 import { UI_CHANNEL, setBootstrapCallback } from './App.network'
 import { PLUGIN } from '../common/networks'
 
@@ -15,24 +23,24 @@ function App() {
   const [pluginReady, setPluginReady] = useState(false)
 
   // Wait for plugin bootstrap before showing UI
-  useEffect(() => {    
+  useEffect(() => {
     // Set bootstrap completion callback
     setBootstrapCallback((flag: boolean) => {
-      setPluginReady(flag);
-    });
+      setPluginReady(flag)
+    })
 
     // Listen for text click notifications from plugin
-    UI_CHANNEL.registerMessageHandler("textClicked", (nodeId, text) => {
+    UI_CHANNEL.registerMessageHandler('textClicked', (nodeId, text) => {
       setClickInfo(`user clicked on ${nodeId} with text "${text}"`)
       setClickedText(text)
       setGeneratedKey('') // Clear previous key
-    });
+    })
   }, [])
 
   // Convert text to kebab-case and create babel key
   const generateKey = () => {
     if (!clickedText.trim()) return
-    
+
     const kebabCase = clickedText
       .toLowerCase()
       .trim()
@@ -40,7 +48,7 @@ function App() {
       .replace(/\s+/g, '-') // Replace spaces with hyphens
       .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
       .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
-    
+
     const key = `babel.key.${kebabCase}`
     setGeneratedKey(key)
   }
@@ -50,8 +58,8 @@ function App() {
       setIsLoading(true)
       const newCount = pongCount + 1
       setPongCount(newCount)
-      
-      const result = await UI_CHANNEL.request(PLUGIN, "ping", [newCount])
+
+      const result = await UI_CHANNEL.request(PLUGIN, 'ping', [newCount])
       setResponse(String(result))
     } catch (error) {
       setResponse(`Error: ${error}`)
@@ -62,10 +70,10 @@ function App() {
 
   const handleSendMessage = async () => {
     if (!message.trim()) return
-    
+
     try {
       setIsLoading(true)
-      const result = await UI_CHANNEL.request(PLUGIN, "message", [message])
+      const result = await UI_CHANNEL.request(PLUGIN, 'message', [message])
       setResponse(String(result))
       setMessage('')
     } catch (error) {
@@ -77,10 +85,12 @@ function App() {
 
   const handleCreateText = async () => {
     if (!textToCreate.trim()) return
-    
+
     try {
       setIsLoading(true)
-      const result = await UI_CHANNEL.request(PLUGIN, "createText", [textToCreate])
+      const result = await UI_CHANNEL.request(PLUGIN, 'createText', [
+        textToCreate,
+      ])
       setResponse(String(result))
       setTextToCreate('')
     } catch (error) {
@@ -93,18 +103,22 @@ function App() {
   // Show loading state until plugin is ready
   if (!pluginReady) {
     return (
-      <Box 
-        padding="SP6" 
-        direction="vertical" 
-        gap="SP4" 
+      <Box
+        padding="SP6"
+        direction="vertical"
+        gap="SP4"
         align="center"
         height="100vh"
         verticalAlign="middle"
       >
         <Box direction="vertical" gap="SP3" align="center">
           <Loader size="medium" />
-          <Text size="medium" weight="bold">Initializing Plugin...</Text>
-          <Text size="small" secondary>Waiting for Figma plugin to load</Text>
+          <Text size="medium" weight="bold">
+            Initializing Plugin...
+          </Text>
+          <Text size="small" secondary>
+            Waiting for Figma plugin to load
+          </Text>
         </Box>
       </Box>
     )
@@ -112,123 +126,128 @@ function App() {
 
   return (
     <WixDesignSystemProvider features={{ newColorsBranding: true }}>
-    <Box 
-      padding="SP6" 
-      direction="vertical" 
-      gap="SP4" 
-      align="center"
-      height="100vh"
-      verticalAlign="middle"
-    >
-      <Text size="medium" weight="bold">🎯 Figma Plugin</Text>
-      
-      <Card>
-        <Card.Content>
-          <Box 
-            direction="vertical" 
-            gap="SP4" 
-            width="350px"
-            padding="SP4"
-          >
-            
-            {/* Ping Button */}
-            <Button 
-              onClick={handlePing} 
-              disabled={isLoading}
-              size="large"
-              skin="premium"
-              fullWidth
-            >
-              {isLoading ? 'Pinging...' : '🏓 Ping'}
-            </Button>
-            
-            {/* Message Input */}
-            <Input
-              placeholder="Type message (e.g., 'Hi')"
-              value={message}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMessage(e.target.value)}
-              onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && !isLoading && handleSendMessage()}
-            />
-            
-            <Button 
-              onClick={handleSendMessage} 
-              disabled={isLoading || !message.trim()}
-              size="large"
-              skin="dark"
-              fullWidth
-            >
-              {isLoading ? 'Sending...' : '📤 Send'}
-            </Button>
+      <Box
+        padding="SP6"
+        direction="vertical"
+        gap="SP4"
+        align="center"
+        height="100vh"
+        verticalAlign="middle"
+      >
+        <Text size="medium" weight="bold">
+          🎯 Figma Plugin
+        </Text>
 
-            {/* Text Creation */}
-            <Input
-              placeholder="Enter text to create in Figma"
-              value={textToCreate}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTextToCreate(e.target.value)}
-              onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && !isLoading && handleCreateText()}
-            />
-            
-            <Button 
-              onClick={handleCreateText} 
-              disabled={isLoading || !textToCreate.trim()}
-              size="large"
-              skin="standard"
-              fullWidth
-            >
-              {isLoading ? 'Creating...' : '📝 Create Text'}
-            </Button>
-            
-            {/* Simple Response Display */}
-            {response && (
-              <Box 
-                padding="SP3" 
-                backgroundColor="D80" 
-                borderRadius="4px"
+        <Card>
+          <Card.Content>
+            <Box direction="vertical" gap="SP4" width="350px" padding="SP4">
+              {/* Ping Button */}
+              <Button
+                onClick={handlePing}
+                disabled={isLoading}
+                size="large"
+                skin="premium"
+                fullWidth
               >
-                <Text size="small">{response}</Text>
-              </Box>
-            )}
+                {isLoading ? 'Pinging...' : '🏓 Ping'}
+              </Button>
 
-            {/* Click Info Display with Generate Key */}
-            {clickInfo && (
-              <Box 
-                padding="SP3" 
-                backgroundColor="B40" 
-                borderRadius="4px"
-                direction="vertical"
-                gap="SP2"
+              {/* Message Input */}
+              <Input
+                placeholder="Type message (e.g., 'Hi')"
+                value={message}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setMessage(e.target.value)
+                }
+                onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) =>
+                  e.key === 'Enter' && !isLoading && handleSendMessage()
+                }
+              />
+
+              <Button
+                onClick={handleSendMessage}
+                disabled={isLoading || !message.trim()}
+                size="large"
+                skin="dark"
+                fullWidth
               >
-                <Text size="small" weight="bold">Auto-detected click:</Text>
-                <Text size="small">{clickInfo}</Text>
-                
-                <Button 
-                  onClick={generateKey}
-                  disabled={!clickedText.trim()}
-                  size="small"
-                  skin="light"
-                  fullWidth
+                {isLoading ? 'Sending...' : '📤 Send'}
+              </Button>
+
+              {/* Text Creation */}
+              <Input
+                placeholder="Enter text to create in Figma"
+                value={textToCreate}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setTextToCreate(e.target.value)
+                }
+                onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) =>
+                  e.key === 'Enter' && !isLoading && handleCreateText()
+                }
+              />
+
+              <Button
+                onClick={handleCreateText}
+                disabled={isLoading || !textToCreate.trim()}
+                size="large"
+                skin="standard"
+                fullWidth
+              >
+                {isLoading ? 'Creating...' : '📝 Create Text'}
+              </Button>
+
+              {/* Simple Response Display */}
+              {response && (
+                <Box padding="SP3" backgroundColor="D80" borderRadius="4px">
+                  <Text size="small">{response}</Text>
+                </Box>
+              )}
+
+              {/* Click Info Display with Generate Key */}
+              {clickInfo && (
+                <Box
+                  padding="SP3"
+                  backgroundColor="B40"
+                  borderRadius="4px"
+                  direction="vertical"
+                  gap="SP2"
                 >
-                  🔑 Generate Key
-                </Button>
-                
-                {generatedKey && (
-                  <Box 
-                    padding="SP2" 
-                    backgroundColor="G50" 
-                    borderRadius="4px"
-                    gap="SP1"
+                  <Text size="small" weight="bold">
+                    Auto-detected click:
+                  </Text>
+                  <Text size="small">{clickInfo}</Text>
+
+                  <Button
+                    onClick={generateKey}
+                    disabled={!clickedText.trim()}
+                    size="small"
+                    skin="light"
+                    fullWidth
                   >
-                    <Text size="small" weight="bold">Generated Key:</Text>
-                    <Text size="small" skin="standard">{generatedKey}</Text>
-                  </Box>
-                )}
-              </Box>
-            )}
-            
-          </Box>
-        </Card.Content>
-      </Card>
-    </Box>
+                    🔑 Generate Key
+                  </Button>
+
+                  {generatedKey && (
+                    <Box
+                      padding="SP2"
+                      backgroundColor="G50"
+                      borderRadius="4px"
+                      gap="SP1"
+                    >
+                      <Text size="small" weight="bold">
+                        Generated Key:
+                      </Text>
+                      <Text size="small" skin="standard">
+                        {generatedKey}
+                      </Text>
+                    </Box>
+                  )}
+                </Box>
+              )}
+            </Box>
+          </Card.Content>
+        </Card>
+      </Box>
     </WixDesignSystemProvider>
   )
 }
