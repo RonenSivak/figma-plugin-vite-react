@@ -1,4 +1,5 @@
 import { expect, Page } from '@playwright/test'
+import { createPostMessageInterceptor, defaultMockResponses, MockResponseConfig, InterceptPostMessageOptions } from './interceptPostMessage'
 
 export class E2eTestDriver {
   constructor(private page: Page) {}
@@ -91,101 +92,31 @@ export class E2eTestDriver {
 
   // SET - Setup, configuration, and mocking
   set = {
-    setupMocks: async () => {
+    postMessageInterceptor: async (config: Partial<InterceptPostMessageOptions>) => {
       // Listen to console messages for debugging
       this.page.on('console', msg => {
         console.log(`PAGE LOG: ${msg.type()}: ${msg.text()}`)
       })
 
-      // Mock the plugin API by intercepting postMessage communication
-      await this.page.addInitScript(() => {
-        // Store original console.log to help with debugging
-        const originalLog = console.log
+      // Use default mock responses if none provided
+      const options: InterceptPostMessageOptions = {
+        mockResponses: defaultMockResponses,
+        delay: 100,
+        enableLogging: true,
+        ...config
+      }
 
-        // Mock parent.postMessage to intercept UI -> Plugin messages
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        window.parent.postMessage = (message: any) => {
-          originalLog('Intercepted postMessage:', message)
-
-          // Check if this is a plugin message
-          if (message?.pluginMessage) {
-            const pluginMessage = message.pluginMessage
-            originalLog('Plugin message:', pluginMessage)
-
-            // Simulate plugin response after a delay
-            setTimeout(() => {
-              const mockResponse = getMockResponse(pluginMessage)
-              if (mockResponse) {
-                originalLog('Sending mock response:', mockResponse)
-
-                // Simulate plugin response by dispatching MessageEvent
-                window.dispatchEvent(new MessageEvent('message', {
-                  data: {
-                    pluginId: 'mock-plugin',
-                    pluginMessage: mockResponse
-                  }
-                }))
-              }
-            }, 100)
-          }
-
-          // Don't call original postMessage to avoid errors
-        }
-
-        // Function to generate mock responses based on the request
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        function getMockResponse(pluginMessage: any) {
-          const { eventName, payload, messageId } = pluginMessage
-
-          originalLog(`Generating mock response for eventName: ${eventName}, payload:`, payload)
-
-          switch (eventName) {
-            case 'ping': {
-              const count = payload?.[0] || 1
-              const response = `Pong received! Count: ${count}`
-              originalLog(`Generated ping response: ${response}`)
-              return {
-                messageId,
-                fromSide: 'Plugin-side',
-                eventName: '__INTERNAL_SUCCESS_RESPONSE_EVENT',
-                payload: [response]
-              }
-            }
-
-            case 'message': {
-              const message = payload?.[0] || ''
-              const response = `Message received: "${message}"`
-              originalLog(`Generated message response: ${response}`)
-              return {
-                messageId,
-                fromSide: 'Plugin-side',
-                eventName: '__INTERNAL_SUCCESS_RESPONSE_EVENT',
-                payload: [response]
-              }
-            }
-
-            case 'createText': {
-              const text = payload?.[0] || ''
-              const response = `Text node created: "${text}"`
-              originalLog(`Generated createText response: ${response}`)
-              return {
-                messageId,
-                fromSide: 'Plugin-side',
-                eventName: '__INTERNAL_SUCCESS_RESPONSE_EVENT',
-                payload: [response]
-              }
-            }
-
-            default:
-              originalLog(`No mock response for eventName: ${eventName}`)
-              return null
-          }
-        }
-
-        originalLog('postMessage mock installed successfully')
-      })
+      // Inject the configurable postMessage interceptor
+      const interceptorScript = createPostMessageInterceptor(options)
+      await this.page.addInitScript(interceptorScript)
 
       return this
+    },
+
+    setupMocks: async (mockResponses?: MockResponseConfig) => {
+      return this.set.postMessageInterceptor({
+        mockResponses: mockResponses || defaultMockResponses
+      })
     },
 
     navigateToApp: async () => {
