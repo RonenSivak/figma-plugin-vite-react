@@ -28,14 +28,14 @@ jobs:
     - name: Install dependencies
       run: | 
         yarn install
-
-    - name: Set next Figma version as minor version in package.js
-      run: | 
-        npx figcd prepare -t ${{ env.FIGMA_WEB_AUTHN_TOKEN }} -m ./dist/manifest.json
       
     - name: Build plugin
       run: |
         yarn build
+
+    - name: Set next Figma version as minor version in package.js
+      run: | 
+        npx figcd prepare -t ${{ env.FIGMA_WEB_AUTHN_TOKEN }} -m ./dist/manifest.json
           
     - name: Publish new Version to Figma
       run: | 
