@@ -5,7 +5,7 @@ on:
     branches: [ "production" ]
 
 env:
-  FIGMA_WEB_AUTHN_TOKEN: ${{ secrets.FIGMA_WEB_AUTHN_TOKEN.FIGMA_WEB_AUTHN_TOKEN }}
+  FIGMA_WEB_AUTHN_TOKEN: ${{ secrets.FIGMA_WEB_AUTHN_TOKEN }}
 
 jobs:
   build:
