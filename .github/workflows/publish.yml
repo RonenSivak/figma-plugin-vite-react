@@ -49,17 +49,9 @@ jobs:
         yarn lint
         echo "✅ Linting passed successfully"
 
-    - name: Set next Figma version
-      id: version
-      if: steps.lint.outcome == 'success'
-      run: | 
-        echo "Setting next Figma version..."
-        npx figcd prepare
-        echo "✅ Version prepared successfully"
-
     - name: Build UI
       id: build-ui
-      if: steps.version.outcome == 'success'
+      if: steps.lint.outcome == 'success'
       run: |
         echo "Building UI..."
         yarn build:ui
@@ -73,21 +65,29 @@ jobs:
         yarn build:plugin
         echo "✅ Plugin built successfully"
 
+    - name: Set next Figma version
+      id: version
+      if: steps.build-plugin.outcome == 'success'
+      run: | 
+        echo "Setting next Figma version..."
+        npx figcd prepare --manifest-file ./dist/manifest.json
+        echo "✅ Version prepared successfully"
+
     - name: Verify build outputs
       id: verify
-      if: steps.build-plugin.outcome == 'success'
+      if: steps.version.outcome == 'success'
       run: |
         echo "Verifying build outputs..."
-        if [ ! -f "manifest.json" ]; then
-          echo "❌ manifest.json not found"
+        if [ ! -f "dist/manifest.json" ]; then
+          echo "❌ dist/manifest.json not found"
           exit 1
         fi
-        if [ ! -f "index.html" ]; then
-          echo "❌ index.html not found"
+        if [ ! -f "dist/index.html" ]; then
+          echo "❌ dist/index.html not found"
           exit 1
         fi
-        if [ ! -f "code.js" ]; then
-          echo "❌ code.js not found"
+        if [ ! -f "dist/code.js" ]; then
+          echo "❌ dist/code.js not found"
           exit 1
         fi
         echo "✅ All required files verified"
@@ -97,5 +97,5 @@ jobs:
       if: steps.verify.outcome == 'success'
       run: | 
         echo "Publishing to Figma..."
-        npx figcd release
+        npx figcd release --manifest-file ./dist/manifest.json
         echo "✅ Plugin published successfully" 
