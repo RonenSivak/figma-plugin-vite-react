@@ -18,11 +18,11 @@ export default defineConfig(({ mode }) => ({
     sourcemap: mode !== 'production' ? 'inline' : false,
     target: 'es2017',
     emptyOutDir: false,
-    outDir: path.resolve('dist'),
+    outDir: path.resolve('.'),
     rollupOptions: {
       input: path.resolve('src/plugin/index.ts'),
       output: {
-        entryFileNames: 'plugin.js',
+        entryFileNames: 'code.js',
       },
     },
   },

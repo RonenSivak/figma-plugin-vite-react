@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.3",
   "type": "module",
+  "packageManager": "yarn@4.9.2",
   "scripts": {
     "start": "run-s dev",
     "dev": "run-s watch",

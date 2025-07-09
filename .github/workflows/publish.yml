@@ -15,28 +15,81 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Use Node.js 18.x
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: 18
         cache: 'yarn'
     
-    - name: Enable Corepack and set Yarn version
-      run: |
-        corepack enable
-        corepack prepare yarn@4.9.2 --activate
-    
     - name: Install dependencies
+      id: install
       run: | 
+        echo "Installing dependencies..."
         yarn install
+        echo "✅ Dependencies installed successfully"
 
-    - name: Set next Figma version as minor version in package.js
-      run: | 
-        npx figcd prepare --manifest-file ./dist/manifest.json
-      
-    - name: Build plugin
+    - name: Run tests
+      id: test
+      if: steps.install.outcome == 'success'
       run: |
-        yarn build
-          
-    - name: Publish new Version to Figma
+        echo "Running tests..."
+        yarn test:run
+        echo "✅ Tests passed successfully"
+
+    - name: Run linting
+      id: lint
+      if: steps.test.outcome == 'success'
+      run: |
+        echo "Running linting..."
+        yarn lint
+        echo "✅ Linting passed successfully"
+
+    - name: Set next Figma version
+      id: version
+      if: steps.lint.outcome == 'success'
       run: | 
-        npx figcd release --manifest-file ./dist/manifest.json 
+        echo "Setting next Figma version..."
+        npx figcd prepare
+        echo "✅ Version prepared successfully"
+
+    - name: Build UI
+      id: build-ui
+      if: steps.version.outcome == 'success'
+      run: |
+        echo "Building UI..."
+        yarn build:ui
+        echo "✅ UI built successfully"
+
+    - name: Build plugin
+      id: build-plugin
+      if: steps.build-ui.outcome == 'success'
+      run: |
+        echo "Building plugin..."
+        yarn build:plugin
+        echo "✅ Plugin built successfully"
+
+    - name: Verify build outputs
+      id: verify
+      if: steps.build-plugin.outcome == 'success'
+      run: |
+        echo "Verifying build outputs..."
+        if [ ! -f "manifest.json" ]; then
+          echo "❌ manifest.json not found"
+          exit 1
+        fi
+        if [ ! -f "index.html" ]; then
+          echo "❌ index.html not found"
+          exit 1
+        fi
+        if [ ! -f "code.js" ]; then
+          echo "❌ code.js not found"
+          exit 1
+        fi
+        echo "✅ All required files verified"
+
+    - name: Publish to Figma
+      id: publish
+      if: steps.verify.outcome == 'success'
+      run: | 
+        echo "Publishing to Figma..."
+        npx figcd release
+        echo "✅ Plugin published successfully" 
