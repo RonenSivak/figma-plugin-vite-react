@@ -25,7 +25,12 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
-    "e2e:codegen": "playwright codegen http://localhost:5173"
+    "e2e:codegen": "playwright codegen http://localhost:5173",
+    "publish:figma": "node scripts/publish-figma-plugin.js",
+    "publish:figma:patch": "node scripts/publish-figma-plugin.js --bump patch",
+    "publish:figma:minor": "node scripts/publish-figma-plugin.js --bump minor",
+    "publish:figma:major": "node scripts/publish-figma-plugin.js --bump major",
+    "publish:figma:dry-run": "node scripts/publish-figma-plugin.js --dry-run"
   },
   "dependencies": {
     "@wix/design-system": "^1.204.0",
@@ -53,6 +58,8 @@
     "eslint": "^9.29.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
+    "figcd": "^0.0.16",
+    "form-data": "^4.0.3",
     "globals": "^16.2.0",
     "happy-dom": "^18.0.1",
     "jsdom": "^26.1.0",
