@@ -31,7 +31,7 @@ jobs:
 
     - name: Set next Figma version as minor version in package.js
       run: | 
-        npx figcd prepare --manifest-file ./dist/manifest.json
+        npx figcd prepare -t ${{ env.FIGMA_WEB_AUTHN_TOKEN }} --manifest-file ./dist/manifest.json
       
     - name: Build plugin
       run: |
@@ -39,4 +39,4 @@ jobs:
           
     - name: Publish new Version to Figma
       run: | 
-        npx figcd release --manifest-file ./dist/manifest.json 
+        npx figcd release -t ${{ env.FIGMA_WEB_AUTHN_TOKEN }} --manifest-file ./dist/manifest.json 
