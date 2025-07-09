@@ -33,10 +33,18 @@ jobs:
       run: |
         yarn build
 
+    - name: Create symlink for figcd compatibility
+      run: |
+        ln -sf ./dist/manifest.json ./manifest.json
+        
     - name: Set next Figma version as minor version in package.js
       run: | 
-        npx figcd prepare -t ${{ env.FIGMA_WEB_AUTHN_TOKEN }} -m ./dist/manifest.json
+        npx figcd prepare -t ${{ env.FIGMA_WEB_AUTHN_TOKEN }}
           
     - name: Publish new Version to Figma
       run: | 
-        npx figcd release -t ${{ env.FIGMA_WEB_AUTHN_TOKEN }} -m ./dist/manifest.json 
+        npx figcd release -t ${{ env.FIGMA_WEB_AUTHN_TOKEN }}
+        
+    - name: Clean up symlink
+      run: |
+        rm -f ./manifest.json 
