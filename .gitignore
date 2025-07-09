@@ -12,6 +12,12 @@ node_modules
 dist-ssr
 *.local
 
+# Build output files in root directory
+manifest.json
+index.html
+code.js
+*.map
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

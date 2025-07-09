@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => ({
     cssMinify: mode === 'production',
     sourcemap: mode !== 'production' ? 'inline' : false,
     emptyOutDir: false,
-    outDir: path.resolve('dist'),
+    outDir: path.resolve('.'),
   },
   resolve: {
     alias: {
