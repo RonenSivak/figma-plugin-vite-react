@@ -8,7 +8,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
     css: true,
-    reporters: ['verbose'],
+    reporters: process.env.CI ? ['basic'] : ['default'],
     exclude: ['tests/e2e/**', 'node_modules/**'],
   },
   resolve: {

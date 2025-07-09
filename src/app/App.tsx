@@ -135,7 +135,7 @@ function App() {
         verticalAlign="middle"
       >
         <Text size="medium" weight="bold">
-          🎯 Figma Plugin (Updated Version)
+          🎯 Figma Plugin
         </Text>
 
         <Card>
