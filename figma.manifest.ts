@@ -1,11 +1,14 @@
 // https://www.figma.com/plugin-docs/manifest/
 export default {
   name: 'Figma-Plugin-Vite-React',
-  id: 'com.ronen.test-plugin',
+  id: '1524395167968571993',
   api: '1.0.0',
-  main: 'plugin.js',
+  main: 'code.js',
   ui: 'index.html',
   capabilities: [],
-  enableProposedApi: false,
-  editorType: ['figma', 'figjam'],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["none"]
+  },
+  editorType: ['figma'],
 }
