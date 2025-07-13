@@ -1,4 +1,5 @@
 import { PLUGIN, UI } from '../common/networks'
+import { handleMessageError, safelyExecuteAsync } from './errorHandler'
 
 export const PLUGIN_CHANNEL = PLUGIN.channelBuilder()
   .emitsTo(UI, message => {
@@ -11,61 +12,43 @@ export const PLUGIN_CHANNEL = PLUGIN.channelBuilder()
   })
   .startListening()
 
-// ---------- Selection management
-let selectionListenerActive = false
-let selectionChangeHandler: (() => void) | null = null
+// ---------- Selection tracking
 
-const handleSelectionChange = () => {
-  const selection = figma.currentPage.selection
-
-  if (selection.length === 1) {
-    const node = selection[0]
-
-    // Check if the selected node is a text node
-    if (node.type === 'TEXT') {
-      console.log('Text node selected:', node.id, node.characters)
-
-      // Send notification to UI
-      PLUGIN_CHANNEL.emit(UI, 'textClicked', [node.id, node.characters])
+export const startSelectionListener = () => {
+  // Track selection changes
+  figma.on('selectionchange', () => {
+    const selection = figma.currentPage.selection
+    if (selection.length > 0) {
+      const selectedNode = selection[0]
+      if (selectedNode.type === 'TEXT') {
+        console.log('Text node selected:', selectedNode.characters)
+        // Send click notification to UI
+        PLUGIN_CHANNEL.emit(UI, 'textClicked', [selectedNode.id, selectedNode.characters])
+      }
     }
-  }
-}
-
-// Export function to start selection listener (for direct use)
-export const startSelectionListener = (): string => {
-  console.log('Starting selection listener')
-
-  if (!selectionListenerActive) {
-    selectionChangeHandler = handleSelectionChange
-    figma.on('selectionchange', selectionChangeHandler)
-    selectionListenerActive = true
-    return 'Selection listener started'
-  } else {
-    return 'Selection listener already active'
-  }
+  })
 }
 
 // ---------- Message handlers
 
-PLUGIN_CHANNEL.registerMessageHandler('ping', count => {
-  console.log('Plugin received ping with count:', count, 'responding with pong')
-  return `pong: ${count}`
+PLUGIN_CHANNEL.registerMessageHandler('ping', async (count) => {
+  return await safelyExecuteAsync(async () => {
+    console.log('Plugin received ping with count:', count, 'responding with pong')
+    return `pong: ${count}`
+  }, { source: 'ping_handler', messageType: 'ping' })
 })
 
-PLUGIN_CHANNEL.registerMessageHandler('pong', () => {
-  console.log('Plugin received pong, responding with ping')
-  return 'ping'
+PLUGIN_CHANNEL.registerMessageHandler('message', async (text) => {
+  return await safelyExecuteAsync(async () => {
+    console.log('Plugin received message:', text)
+    return `received ${text} from plugin`
+  }, { source: 'message_handler', messageType: 'message' })
 })
 
-PLUGIN_CHANNEL.registerMessageHandler('message', text => {
-  console.log('Plugin received message:', text)
-  return `received ${text} from plugin`
-})
+PLUGIN_CHANNEL.registerMessageHandler('createText', async (text) => {
+  return await safelyExecuteAsync(async () => {
+    console.log('Plugin creating text:', text)
 
-PLUGIN_CHANNEL.registerMessageHandler('createText', async text => {
-  console.log('Plugin creating text:', text)
-
-  try {
     // Load the default font first
     await figma.loadFontAsync({ family: 'Inter', style: 'Regular' })
 
@@ -83,18 +66,17 @@ PLUGIN_CHANNEL.registerMessageHandler('createText', async text => {
     textNode.y = figma.viewport.center.y - textNode.height / 2
 
     return `Created text: "${text}"`
-  } catch (error) {
-    console.error('Error creating text:', error)
-    return `Error creating text: ${error}`
-  }
+  }, { 
+    source: 'create_text_handler', 
+    messageType: 'createText',
+    textContent: text 
+  })
 })
 
-PLUGIN_CHANNEL.registerMessageHandler('hello', text => {
-  console.log('UI side said:', text)
-})
-
-PLUGIN_CHANNEL.registerMessageHandler('helloAck', () => {
-  console.log('Received hello-ack from UI, sending ready signal')
-  // Step 3 of handshake: Send ready signal to UI
-  PLUGIN_CHANNEL.emit(UI, 'ready', [])
+// Add error handler for UI messages
+PLUGIN_CHANNEL.registerMessageHandler('error', async (error, context) => {
+  console.log('Received error from UI:', error, context)
+  // Log the error from UI side
+  handleMessageError(error, 'ui_error')
+  return 'Error logged'
 })

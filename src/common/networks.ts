@@ -6,6 +6,7 @@ export const UI = Networker.createSide('UI-side').listens<{
   hello(text: string): void
   ready(): void
   textClicked(nodeId: string, text: string): void
+  error(error: unknown, context?: unknown): void
 }>()
 
 export const PLUGIN = Networker.createSide('Plugin-side').listens<{
@@ -17,4 +18,5 @@ export const PLUGIN = Networker.createSide('Plugin-side').listens<{
   createRect(width: number, height: number): void
   createText(text: string): Promise<string>
   exportSelection(): Promise<string>
+  error(error: unknown, context?: unknown): Promise<string>
 }>()

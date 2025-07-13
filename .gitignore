@@ -27,3 +27,5 @@ coverage
 playwright-report
 test-results
 debug-screenshot.png*
+
+.specstory

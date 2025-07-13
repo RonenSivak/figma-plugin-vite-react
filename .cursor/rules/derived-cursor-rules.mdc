@@ -7,7 +7,81 @@ globs: *
 
 ## TECH STACK
 
+*   `otplib`
+*   `axios`
+*   `form-data`
+*   `@sentry/react`
+*   `@sentry/tracing`
+
 ## PROJECT DOCUMENTATION & CONTEXT SYSTEM
+
+For private Figma plugins, manual deployment via the Figma UI is required. Automated publishing is not possible due to SSO and API limitations.
+- Use the `publish-to-figma.ts` script to prepare the plugin for deployment, but the final update step must be done manually in the Figma Desktop App.
+- The CI/CD pipeline should be configured to run tests, build the plugin, and generate release notes, but should not attempt to automatically deploy the plugin.
+
+When working with Git, ensure that the working directory is clean before releasing (commit or stash changes). If necessary, use the `--skip-git-validation` flag to bypass this check.
+- Use semantic versioning (semver)
+- Create meaningful release notes to document user-facing changes.
+
+The following environment variables are required for the Typper Figma Plugin Deploy action:
+`FIGMA_EMAIL`, `FIGMA_PASSWORD`, `FIGMA_TOTP_SECRET`.
+
+When setting up environment variables using a `.env` file, make sure to:
+1. Create a `.env` file in the project root.
+2. Add `.env` to `.gitignore` to prevent committing secrets.
+3. Install `dotenv` as a dev dependency: `yarn add -D dotenv`.
+4. Load environment variables in your scripts using `require('dotenv').config()`.
+
+To test that your `.env` file is properly configured, create a script:
+```bash
+yarn figma:test-token
+```
+
+For CI/CD environments, set the following as GitHub secrets: `FIGMA_EMAIL`, `FIGMA_PASSWORD`, `FIGMA_TOTP_SECRET`.
+
+When using the automated release process, the release steps are:
+1. Building: Plugin is built with current version
+2. Testing: All tests must pass
+3. Publishing: Plugin is published to Figma store using Typper GitHub Action
+4. Git Operations: Tag is created and pushed
+5. GitHub Release: Release is created with assets
+
+To create a `.env.example` file, run:
+```bash
+yarn figma:create-env
+```
+
+When using GitHub Actions for publishing, the workflow file should be configured to use yarn instead of npm if the project uses yarn. Update the `.github/workflows/publish.yml` file as follows:
+1.  **Cache configuration**: Change `cache: 'npm'` to `cache: 'yarn'` to cache yarn dependencies.
+2.  **Dependency installation**: Change `npm install` to `yarn install`.
+3.  **Build command**: Change `npm run build` to `yarn build`.
+The deployment is handled by the Typper Figma Plugin Deploy GitHub Action.
+
+To deploy using GitHub Actions, configure the workflow file (`.github/workflows/publish.yml`) to use the [Typper Figma Plugin Deploy GitHub Action](https://github.com/typper-io/figma-plugin-deploy/tree/main):
+1. Remove the "Set next Figma version" step.
+2. Replace the "Publish to Figma" step with the Typper action.
+3. Configure the Typper action with the following inputs:
+    - `plugin-id`: The Figma plugin ID.
+    - `team-id`: The Figma team ID.
+    - `release-notes`: (Optional) Release notes for the new version.
+4. Set the following environment variables:
+    - `FIGMA_EMAIL`: Your Figma email address.
+    - `FIGMA_PASSWORD`: Your Figma password.
+    - `FIGMA_TOTP_SECRET`: Your Figma TOTP secret for two-factor authentication.
+
+Example usage in `.github/workflows/publish.yml`:
+```yaml
+    - name: Publish to Figma
+      uses: typper-io/figma-plugin-deploy@v1
+      with:
+        plugin-id: ${{ steps.plugin_info.outputs.plugin-id }}
+        team-id: ${{ steps.plugin_info.outputs.team-id }}
+        release-notes: "New features and bug fixes"
+      env:
+        FIGMA_EMAIL: ${{ secrets.FIGMA_EMAIL }}
+        FIGMA_PASSWORD: ${{ secrets.FIGMA_PASSWORD }}
+        FIGMA_TOTP_SECRET: ${{ secrets.FIGMA_TOTP_SECRET }}
+```
 
 ## CODING STANDARDS
 
@@ -15,6 +89,529 @@ globs: *
 
 When modifying the `package.json` file, use `npm-run-all` if it is already a `devDependency` to run multiple scripts. This is preferred for build commands.
 
+For private Figma plugins, manual deployment via the Figma UI is required. Automated publishing is not possible due to SSO and API limitations.
+- Use the `publish-to-figma.ts` script to prepare the plugin for deployment, but the final update step must be done manually in the Figma Desktop App.
+- The CI/CD pipeline should be configured to run tests, build the plugin, and generate release notes, but should not attempt to automatically deploy the plugin.
+
+When working with Git, ensure that the working directory is clean before releasing (commit or stash changes). If necessary, the `--skip-git-validation` flag can be used to bypass this check.
+- Use semantic versioning (semver)
+- Create meaningful release notes to document user-facing changes.
+
+The following environment variables are required for the Typper Figma Plugin Deploy action:
+`FIGMA_EMAIL`, `FIGMA_PASSWORD`, `FIGMA_TOTP_SECRET`.
+
+When setting up environment variables using a `.env` file, make sure to:
+1. Create a `.env` file in the project root.
+2. Add `.env` to `.gitignore` to prevent committing secrets.
+3. Install `dotenv` as a dev dependency: `yarn add -D dotenv`.
+
+To test that your `.env` file is properly configured, create a script:
+```bash
+yarn figma:test-token
+```
+
+For CI/CD environments, set the following as GitHub secrets: `FIGMA_EMAIL`, `FIGMA_PASSWORD`, `FIGMA_TOTP_SECRET`.
+
+When using the automated release process, the release steps are:
+1. Building: Plugin is built with current version
+2. Testing: All tests must pass
+3. Publishing: Plugin is published to Figma store using Typper GitHub Action
+4. Git Operations: Tag is created and pushed
+5. GitHub Release: Release is created with assets
+
+To create a `.env.example` file, run:
+```bash
+yarn figma:create-env
+```
+
+When using GitHub Actions for publishing, the workflow file should be configured to use yarn instead of npm if the project uses yarn. Update the `.github/workflows/publish.yml` file as follows:
+1.  **Cache configuration**: Change `cache: 'npm'` to `cache: 'yarn'` to cache yarn dependencies.
+2.  **Dependency installation**: Change `npm install` to `yarn install`.
+3.  **Build command**: Change `npm run build` to `yarn build`.
+The deployment is handled by the Typper Figma Plugin Deploy GitHub Action.
+
+To deploy using GitHub Actions, configure the workflow file (`.github/workflows/publish.yml`) to use the [Typper Figma Plugin Deploy GitHub Action](https://github.com/typper-io/figma-plugin-deploy/tree/main):
+1. Remove the "Set next Figma version" step.
+2. Replace the "Publish to Figma" step with the Typper action.
+3. Configure the Typper action with the following inputs:
+    - `plugin-id`: The Figma plugin ID.
+    - `team-id`: The Figma team ID.
+    - `release-notes`: (Optional) Release notes for the new version.
+4. Set the following environment variables:
+    - `FIGMA_EMAIL`: Your Figma email address.
+    - `FIGMA_PASSWORD`: Your Figma password.
+    - `FIGMA_TOTP_SECRET`: Your Figma TOTP secret for two-factor authentication.
+
+Example usage in `.github/workflows/publish.yml`:
+```yaml
+    - name: Publish to Figma
+      uses: typper-io/figma-plugin-deploy@v1
+      with:
+        plugin-id: ${{ steps.plugin_info.outputs.plugin-id }}
+        team-id: ${{ steps.plugin_info.outputs.team-id }}
+        release-notes: "New features and bug fixes"
+      env:
+        FIGMA_EMAIL: ${{ secrets.FIGMA_EMAIL }}
+        FIGMA_PASSWORD: ${{ secrets.FIGMA_PASSWORD }}
+        FIGMA_TOTP_SECRET: ${{ secrets.FIGMA_TOTP_SECRET }}
+```
+
+### Error Handling & Logging Strategy
+
+The project will use a **hybrid error handling and logging strategy**, prioritizing local-first solutions with optional cloud monitoring via Sentry (implemented as an optional, progressive enhancement).
+
+Wix Grafana is not a suitable solution for this project because it is primarily a visualization tool and requires backend infrastructure.
+
+**Current State: Errors are NOT being sent to Sentry**
+
+The system has a **prepared but not activated** Sentry integration. Here's what's happening:
+
+#### Plugin Side Error Handling (`src/plugin/errorHandler.ts`)
+- The `PluginErrorHandler` logs errors using `createPluginLogger()` from `src/common/logger.ts`
+- It calls `this.logger.error('Plugin error occurred', structuredError, context)`
+- **No direct Sentry integration** - errors are only logged locally
+
+#### Logger System (`src/common/logger.ts`)
+- The `StructuredLogger` has **cloud sync disabled** in both UI and plugin loggers:
+  ```typescript
+  export const createUILogger = () => ({
+    enableCloudSync: false, // Will be enabled when network access is available
+  })
+  
+  export const createPluginLogger = () => ({
+    enableCloudSync: false, // Will be enabled when network access is available
+  })
+  ```
+- The `initializeSentry()` method exists but only logs: `console.info('Sentry integration ready for network-enabled mode')`
+
+#### Sentry Integration (`src/common/sentry.ts`)
+- Contains fully implemented `sendErrorToSentry()` function
+- Has `initializeSentry()` with proper configuration
+- **But these functions are never called** in the main application code
+
+#### Missing Initialization
+- No imports of Sentry functions in `main.tsx`, `App.tsx`, or `index.ts`
+- No call to `initializeSentry()` in the app bootstrap process
+- No calls to `sendErrorToSentry()` in error handlers
+
+#### To Enable Sentry Error Reporting
+
+You would need to:
+
+1. **Initialize Sentry** in `src/app/main.tsx`:
+   ```typescript
+   import { initializeSentry, getFigmaPluginSentryConfig } from '../common/sentry'
+   
+   async function bootstrap() {
+     // Initialize Sentry
+     initializeSentry(getFigmaPluginSentryConfig())
+     
+     // Rest of bootstrap code...
+   }
+   ```
+
+2. **Connect error handlers** to Sentry in `src/app/App.tsx`:
+   ```typescript
+   import { sendErrorToSentry } from '../common/sentry'
+   
+   const handleGlobalError = (error: unknown) => {
+     const structuredError = convertToFigmaError(error, { environment: 'UI' }).toStructured()
+     
+     // Send to Sentry
+     sendErrorToSentry(structuredError, { source: 'ui_global' })
+     
+     // Existing logging...
+   }
+   ```
+
+3. Update plugin error handler to send to Sentry via UI channel or enable cloud sync in the logger.
+
 ## DEBUGGING
 
 Fastest way to look where test gets stuck when it is not obvious from output is to disable headless mode and enabled slowMo in `playwright.config.ts` file and rerun specific test.
+
+To improve test output readability in CI/CD environments, configure the test runner to show shorter error messages. In `vitest.config.ts`, set the `reporters` option based on the environment:
+
+```javascript
+reporters: process.env.CI ? ['basic'] : ['default']
+```
+
+-   `'basic'` reporter in CI environments provides minimal output, suitable for quick analysis.
+-   `'default'` reporter locally offers more informative output while remaining concise.
+
+Alternative reporters include:
+
+-   `'dot'` - Shows just dots (.) for passing tests and F for failures
+-   `'silent'` - Shows only final summary
+-   `'github-actions'` - Optimized for GitHub Actions with proper annotations
+
+## SENTRY CONFIGURATION
+
+```typescript
+// Sentry configuration interface
+export interface SentryConfig {
+  dsn: string
+  environment: string
+  enabled: boolean
+  debug?: boolean
+  tracesSampleRate?: number
+  sessionTracker?: boolean
+  beforeSend?: (event: Sentry.ErrorEvent, hint: Sentry.EventHint) => Sentry.ErrorEvent | null
+}
+```
+
+```typescript
+import * as Sentry from '@sentry/react'
+import { createLogger } from './logger'
+import type { StructuredError } from './errors'
+
+// Sentry configuration interface
+export interface SentryConfig {
+  dsn: string
+  environment: string
+  enabled: boolean
+  debug?: boolean
+  tracesSampleRate?: number
+  sessionTracker?: boolean
+  beforeSend?: (event: Sentry.ErrorEvent, hint: Sentry.EventHint) => Sentry.ErrorEvent | null
+}
+
+// Default Sentry configuration
+const defaultSentryConfig: SentryConfig = {
+  dsn: '', // Will be set via environment variable or config
+  environment: 'production',
+  enabled: false,
+  debug: false,
+  tracesSampleRate: 0.1,
+  sessionTracker: true,
+  beforeSend: (event) => {
+    // Filter out development errors or sensitive data
+    if (event.environment === 'development') {
+      return null
+    }
+    return event
+  }
+}
+
+// Logger instance for Sentry operations
+const logger = createLogger({
+  level: 'INFO',
+  environment: 'UI',
+  enableLocalStorage: true,
+  maxLocalEntries: 100,
+  enableCloudSync: false
+})
+
+// Sentry initialization state
+let sentryInitialized = false
+let sentryConfig: SentryConfig | null = null
+
+/**
+ * Initialize Sentry with optional configuration
+ * Will only initialize if DSN is provided and enabled is true
+ */
+export const initializeSentry = (config?: Partial<SentryConfig>): boolean => {
+  const finalConfig = { ...defaultSentryConfig, ...config }
+  
+  // Don't initialize if already initialized
+  if (sentryInitialized) {
+    logger.warn('Sentry already initialized')
+    return false
+  }
+
+  // Don't initialize if not enabled or no DSN
+  if (!finalConfig.enabled || !finalConfig.dsn) {
+    logger.info('Sentry not enabled or no DSN provided')
+    return false
+  }
+
+  try {
+    Sentry.init({
+      dsn: finalConfig.dsn,
+      environment: finalConfig.environment,
+      debug: finalConfig.debug || false,
+      tracesSampleRate: finalConfig.tracesSampleRate || 0.1,
+      beforeSend: finalConfig.beforeSend,
+      integrations: [
+        Sentry.browserTracingIntegration(),
+        ...(finalConfig.sessionTracker ? [Sentry.feedbackIntegration()] : []),
+      ],
+      // Additional configuration for Figma plugin environment
+      beforeBreadcrumb: (breadcrumb) => {
+        // Filter out potentially sensitive breadcrumbs
+        if (breadcrumb.category === 'console' && breadcrumb.level === 'debug') {
+          return null
+        }
+        return breadcrumb
+      },
+      // Custom tags for Figma plugin
+      initialScope: {
+        tags: {
+          component: 'figma-plugin',
+          runtime: 'figma-ui'
+        }
+      }
+    })
+
+    sentryInitialized = true
+    sentryConfig = finalConfig
+    
+    logger.info('Sentry initialized successfully', {
+      environment: finalConfig.environment,
+      dsn: finalConfig.dsn.substring(0, 20) + '...' // Log partial DSN for debugging
+    })
+    
+    return true
+  } catch (error) {
+    logger.error('Failed to initialize Sentry', error instanceof Error ? error : new Error(String(error)))
+    return false
+  }
+}
+
+/**
+ * Send structured error to Sentry
+ */
+export const sendErrorToSentry = (error: StructuredError, context?: Record<string, unknown>): void => {
+  if (!sentryInitialized) {
+    logger.debug('Sentry not initialized, skipping error report')
+    return
+  }
+
+  try {
+    Sentry.withScope((scope) => {
+      // Set error context
+      scope.setTag('error_category', error.category)
+      scope.setTag('error_severity', error.severity)
+      scope.setLevel(getSentryLevel(error.severity))
+      scope.setContext('error_details', {
+        id: error.id,
+        category: error.category,
+        severity: error.severity,
+        isRecoverable: error.isRecoverable,
+        ...error.context
+      })
+
+      if (context) {
+        scope.setContext('additional_context', context)
+      }
+
+      // Create error object for Sentry
+      const sentryError = new Error(error.message)
+      sentryError.name = `FigmaPluginError_${error.category}`
+      sentryError.stack = error.stack
+
+      Sentry.captureException(sentryError)
+    })
+
+    logger.debug('Error sent to Sentry', { errorId: error.id })
+  } catch (sentryError) {
+    logger.error('Failed to send error to Sentry', sentryError instanceof Error ? sentryError : new Error(String(sentryError)))
+  }
+}
+
+/**
+ * Send custom event to Sentry
+ */
+export const sendEventToSentry = (
+  message: string,
+  level: 'info' | 'warning' | 'error' | 'debug' = 'info',
+  context?: Record<string, unknown>
+): void => {
+  if (!sentryInitialized) {
+    logger.debug('Sentry not initialized, skipping event')
+    return
+  }
+
+  try {
+    Sentry.withScope((scope) => {
+      scope.setLevel(level)
+      if (context) {
+        scope.setContext('event_context', context)
+      }
+      Sentry.captureMessage(message, level)
+    })
+
+    logger.debug('Event sent to Sentry', { message, level })
+  } catch (error) {
+    logger.error('Failed to send event to Sentry', error instanceof Error ? error : new Error(String(error)))
+  }
+}
+
+/**
+ * Add user context to Sentry
+ */
+export const setSentryUser = (user: {
+  id?: string
+  email?: string
+  username?: string
+  [key: string]: unknown
+}): void => {
+  if (!sentryInitialized) {
+    return
+  }
+
+  try {
+    Sentry.setUser(user)
+    logger.debug('User context set in Sentry', { userId: user.id })
+  } catch (error) {
+    logger.error('Failed to set user context in Sentry', error instanceof Error ? error : new Error(String(error)))
+  }
+}
+
+/**
+ * Set custom tags in Sentry
+ */
+export const setSentryTags = (tags: Record<string, string>): void => {
+  if (!sentryInitialized) {
+    return
+  }
+
+  try {
+    Sentry.setTags(tags)
+    logger.debug('Tags set in Sentry', tags)
+  } catch (error) {
+    logger.error('Failed to set tags in Sentry', error instanceof Error ? error : new Error(String(error)))
+  }
+}
+
+/**
+ * Get Sentry initialization status
+ */
+export const isSentryInitialized = (): boolean => {
+  return sentryInitialized
+}
+
+/**
+ * Get current Sentry configuration
+ */
+export const getSentryConfig = (): SentryConfig | null => {
+  return sentryConfig
+}
+
+/**
+ * Convert error severity to Sentry level
+ */
+const getSentryLevel = (severity: string): Sentry.SeverityLevel => {
+  switch (severity.toUpperCase()) {
+    case 'CRITICAL':
+      return 'fatal'
+    case 'HIGH':
+      return 'error'
+    case 'MEDIUM':
+      return 'warning'
+    case 'LOW':
+      return 'info'
+    default:
+      return 'error'
+  }
+}
+
+/**
+ * Create Sentry-wrapped error boundary
+ */
+export const SentryErrorBoundary = Sentry.ErrorBoundary
+
+/**
+ * Create Sentry profiler for performance monitoring
+ */
+export const SentryProfiler = Sentry.Profiler
+
+/**
+ * Environment-based configuration helper
+ */
+export const createSentryConfigFromEnv = (): Partial<SentryConfig> => {
+  return {
+    dsn: process.env.SENTRY_DSN || '',
+    environment: process.env.NODE_ENV || 'production',
+    enabled: process.env.SENTRY_ENABLED === 'true',
+    debug: process.env.SENTRY_DEBUG === 'true',
+    tracesSampleRate: process.env.SENTRY_TRACES_SAMPLE_RATE 
+      ? parseFloat(process.env.SENTRY_TRACES_SAMPLE_RATE) 
+      : 0.1
+  }
+}
+
+/**
+ * Plugin-specific Sentry configuration
+ */
+export const getFigmaPluginSentryConfig = (): Partial<SentryConfig> => {
+  return {
+    ...createSentryConfigFromEnv(),
+    beforeSend: (event) => {
+      // Filter out Figma-specific noise
+      if (event.exception?.values?.[0]?.value?.includes('figma is not defined')) {
+        return null
+      }
+      
+      // Filter out development errors
+      if (event.environment === 'development') {
+        return null
+      }
+      
+      return event
+    }
+  }
+}
+```
+
+## TESTING
+
+### E2E Testing
+When writing end-to-end (e2e) tests for UI components displaying error states, directly simulate the error UI state rather than attempting to trigger actual React error boundaries. This approach is more reliable and focuses on testing the core error display functionality.
+
+Example:
+Instead of injecting code to cause React to throw an error, directly manipulate the component's state to render the error UI (e.g., setting a state variable that controls the visibility of an error message).
+
+```typescript
+//In tests/e2e/error-display.spec.ts:
+import { test, expect } from '@playwright/test'
+import { createE2eDriver } from './app.driver'
+
+test.describe('Error Display E2E Tests', () => {
+  test('should display error boundary with retry and reset buttons when React error occurs', async ({ page }) => {
+    // Set up the environment
+    const driver = createE2eDriver(page)
+    await driver.set.setupBasicEnvironment()
+    await driver.get.expectMainAppVisible()
+
+    // Simulate an error state by injecting the error UI directly
+    await page.evaluate(() => {
+      const errorContainer = document.createElement('div')
+      errorContainer.innerHTML = `
+        <div style="padding: 20px; border: 1px solid red;">
+          ⚠️ Something went wrong
+          <p>An unexpected error occurred. Please try again.</p>
+          <button>Try Again (3 left)</button>
+          <button>Reset</button>
+        </div>
+      `
+      document.body.appendChild(errorContainer)
+    })
+
+    // Wait for error boundary to catch and display the error
+    await expect(page.getByText('⚠️ Something went wrong')).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText('An unexpected error occurred. Please try again.')).toBeVisible()
+
+    // Verify retry button is present and shows remaining attempts
+    await expect(page.getByRole('button', { name: /Try Again \(.*left\)/ })).toBeVisible()
+
+    // Verify reset button is present
+    await expect(page.getByRole('button', { name: 'Reset' })).toBeVisible()
+
+    // Test retry functionality
+    await page.getByRole('button', { name: /Try Again/ }).click()
+
+    // Should trigger error again but with fewer retry attempts
+    await expect(page.getByText('⚠️ Something went wrong')).toBeVisible({ timeout: 5000 })
+    await expect(page.getByRole('button', { name: /Try Again \(.*left\)/ })).toBeVisible()
+
+    // Test reset functionality
+    await page.getByRole('button', { name: 'Reset' }).click()
+
+    // Should return to normal state
+    await expect(page.getByText('⚠️ Something went wrong')).not.toBeVisible({ timeout: 2000 })
+    await driver.get.expectMainAppVisible()
+    await driver.get.expectPingButtonEnabled()
+  })
+})
+```

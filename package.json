@@ -34,6 +34,8 @@
     "publish:figma:dry-run": "node scripts/publish-figma-plugin.js --dry-run"
   },
   "dependencies": {
+    "@sentry/react": "^9.36.0",
+    "@sentry/tracing": "^7.120.3",
     "@wix/design-system": "^1.204.0",
     "monorepo-networker": "^2.1.0",
     "react": "^19.1.0",
