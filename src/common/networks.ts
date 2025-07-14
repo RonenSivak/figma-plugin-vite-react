@@ -6,6 +6,7 @@ export const UI = Networker.createSide('UI-side').listens<{
   hello(text: string): void
   ready(): void
   textClicked(nodeId: string, text: string): void
+  authStatusChanged(isAuthenticated: boolean): void
 }>()
 
 export const PLUGIN = Networker.createSide('Plugin-side').listens<{
@@ -16,5 +17,13 @@ export const PLUGIN = Networker.createSide('Plugin-side').listens<{
   message(text: string): string
   createRect(width: number, height: number): void
   createText(text: string): Promise<string>
+  createTextAuth(text: string): Promise<string>
   exportSelection(): Promise<string>
+  checkAuthStatus(): Promise<boolean>
+  saveToken(token: string): Promise<void>
+  getToken(): Promise<string | null>
+  clearToken(): Promise<void>
+  saveCodeVerifier(codeVerifier: string): Promise<void>
+  getCodeVerifier(): Promise<string | null>
+  clearCodeVerifier(): Promise<void>
 }>()

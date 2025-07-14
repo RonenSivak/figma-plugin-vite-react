@@ -10,6 +10,7 @@ import {
 } from '@wix/design-system'
 import { UI_CHANNEL, setBootstrapCallback } from './App.network'
 import { PLUGIN } from '../common/networks'
+import { AuthManager } from './components/AuthManager'
 
 function App() {
   const [message, setMessage] = useState('')
@@ -21,6 +22,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false)
   const [pongCount, setPongCount] = useState(0)
   const [pluginReady, setPluginReady] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   // Wait for plugin bootstrap before showing UI
   useEffect(() => {
@@ -34,6 +36,11 @@ function App() {
       setClickInfo(`user clicked on ${nodeId} with text "${text}"`)
       setClickedText(text)
       setGeneratedKey('') // Clear previous key
+    })
+
+    // Listen for auth status changes from plugin
+    UI_CHANNEL.registerMessageHandler('authStatusChanged', (authenticated) => {
+      setIsAuthenticated(authenticated)
     })
   }, [])
 
@@ -88,15 +95,38 @@ function App() {
 
     try {
       setIsLoading(true)
-      const result = await UI_CHANNEL.request(PLUGIN, 'createText', [
-        textToCreate,
-      ])
+      const result = await UI_CHANNEL.request(PLUGIN, 'createText', [textToCreate])
       setResponse(String(result))
       setTextToCreate('')
     } catch (error) {
       setResponse(`Error: ${error}`)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleCreateAuthText = async () => {
+    if (!textToCreate.trim()) return
+
+    try {
+      setIsLoading(true)
+      const result = await UI_CHANNEL.request(PLUGIN, 'createTextAuth', [textToCreate])
+      setResponse(String(result))
+      setTextToCreate('')
+    } catch (error) {
+      setResponse(`Error: ${error}`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleAuthStateChange = (authenticated: boolean) => {
+    setIsAuthenticated(authenticated)
+  }
+
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>, action: () => void) => {
+    if (event.key === 'Enter' && !isLoading) {
+      action()
     }
   }
 
@@ -126,6 +156,7 @@ function App() {
 
   return (
     <WixDesignSystemProvider features={{ newColorsBranding: true }}>
+      <AuthManager onAuthStateChange={handleAuthStateChange} />
       <Box
         padding="SP6"
         direction="vertical"
@@ -134,13 +165,18 @@ function App() {
         height="100vh"
         verticalAlign="middle"
       >
+       
+
         <Text size="medium" weight="bold">
           🎯 Figma Plugin
         </Text>
 
         <Card>
+          
+          
           <Card.Content>
             <Box direction="vertical" gap="SP4" width="350px" padding="SP4">
+
               {/* Ping Button */}
               <Button
                 onClick={handlePing}
@@ -159,8 +195,8 @@ function App() {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setMessage(e.target.value)
                 }
-                onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) =>
-                  e.key === 'Enter' && !isLoading && handleSendMessage()
+                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
+                  handleKeyPress(e, handleSendMessage)
                 }
               />
 
@@ -181,20 +217,32 @@ function App() {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setTextToCreate(e.target.value)
                 }
-                onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) =>
-                  e.key === 'Enter' && !isLoading && handleCreateText()
+                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
+                  handleKeyPress(e, handleCreateText)
                 }
               />
 
-              <Button
-                onClick={handleCreateText}
-                disabled={isLoading || !textToCreate.trim()}
-                size="large"
-                skin="standard"
-                fullWidth
-              >
-                {isLoading ? 'Creating...' : '📝 Create Text'}
-              </Button>
+              <Box direction="horizontal" gap="SP2">
+                <Button
+                  onClick={handleCreateText}
+                  disabled={isLoading || !textToCreate.trim()}
+                  size="large"
+                  skin="standard"
+                  fullWidth
+                >
+                  {isLoading ? 'Creating...' : '📝 Create Text'}
+                </Button>
+                <Button
+                  onClick={handleCreateAuthText}
+                  disabled={isLoading || !textToCreate.trim() || !isAuthenticated}
+                  size="large"
+                  skin="premium"
+                  fullWidth
+                  tooltip={!isAuthenticated ? 'Authentication required' : ''}
+                >
+                  {isLoading ? 'Creating...' : '🔐 Create (Auth)'}
+                </Button>
+              </Box>
 
               {/* Simple Response Display */}
               {response && (

@@ -1552,6 +1552,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/crypto-js@npm:^4":
+  version: 4.2.2
+  resolution: "@types/crypto-js@npm:4.2.2"
+  checksum: 10c0/760a2078f36f2a3a1089ef367b0d13229876adcf4bcd6e8824d00d9e9bfad8118dc7e6a3cc66322b083535e12be3a29044ccdc9603bfb12519ff61551a3322c6
+  languageName: node
+  linkType: hard
+
 "@types/deep-eql@npm:*":
   version: 4.0.2
   resolution: "@types/deep-eql@npm:4.0.2"
@@ -2720,6 +2727,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"crypto-js@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "crypto-js@npm:4.2.0"
+  checksum: 10c0/8fbdf9d56f47aea0794ab87b0eb9833baf80b01a7c5c1b0edc7faf25f662fb69ab18dc2199e2afcac54670ff0cd9607a9045a3f7a80336cccd18d77a55b9fdf0
+  languageName: node
+  linkType: hard
+
 "css-element-queries@npm:^1.2.3":
   version: 1.2.3
   resolution: "css-element-queries@npm:1.2.3"
@@ -3739,6 +3753,7 @@ __metadata:
     "@testing-library/jest-dom": "npm:^6.6.3"
     "@testing-library/react": "npm:^16.3.0"
     "@testing-library/user-event": "npm:^14.6.1"
+    "@types/crypto-js": "npm:^4"
     "@types/jsdom": "npm:^21.1.7"
     "@types/node": "npm:^18.15.11"
     "@types/postcss-url": "npm:^10.0.0"
@@ -3749,6 +3764,7 @@ __metadata:
     "@vitest/coverage-v8": "npm:3.2.4"
     "@vitest/ui": "npm:^3.2.4"
     "@wix/design-system": "npm:^1.204.0"
+    crypto-js: "npm:^4.2.0"
     eslint: "npm:^9.29.0"
     eslint-plugin-react-hooks: "npm:^5.2.0"
     eslint-plugin-react-refresh: "npm:^0.4.20"
