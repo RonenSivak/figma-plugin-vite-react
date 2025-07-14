@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "@wix/design-system": "^1.204.0",
+    "crypto-js": "^4.2.0",
     "monorepo-networker": "^2.1.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
@@ -47,6 +48,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@types/crypto-js": "^4",
     "@types/jsdom": "^21.1.7",
     "@types/node": "^18.15.11",
     "@types/postcss-url": "^10.0.0",

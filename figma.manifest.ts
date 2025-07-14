@@ -8,7 +8,8 @@ export default {
   capabilities: [],
   "documentAccess": "dynamic-page",
   "networkAccess": {
-    "allowedDomains": ["none"]
+    "allowedDomains": ["*"],
+    "reasoning": "This plugin needs to access the internet to get the OAuth tokens"
   },
   editorType: ['figma'],
 }

@@ -23,7 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 
+oauth-server-example/.env
+.env
+
 coverage
 playwright-report
 test-results
 debug-screenshot.png*
+oauth-server-example/node_modules
