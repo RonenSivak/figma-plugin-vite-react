@@ -41,9 +41,17 @@ jobs:
         yarn test:run
         echo "✅ Tests passed successfully"
 
+    - name: Run e2e tests
+      id: e2e-test
+      if: steps.test.outcome == 'success'
+      run: |
+        echo "Running e2e tests..."
+        yarn test:e2e
+        echo "✅ Tests passed successfully"
+
     - name: Run linting
       id: lint
-      if: steps.test.outcome == 'success'
+      if: steps.e2e-test.outcome == 'success'
       run: |
         echo "Running linting..."
         yarn lint
